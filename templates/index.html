@@ -8,109 +8,147 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            display: flex;
+            gap: 0;
+            height: 100vh;
         }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            text-align: center;
+        .left-panel, .right-panel {
+            flex: 3;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        
+        }
+        .left-panel {
+            border-right: 2px solid #ccc;
+            width: 54%;  /* Set right panel to 40% of screen */
+            flex: 0 0 54%;
         }
         .text-field {
-            width: 100%;
-            height: 100px;
-            margin-bottom: 20px;
+            width: 95%;
+            height: 350px;
+            margin: 20px 0;
+            padding: 15px;
             font-size: 16px;
-            padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 8px;
             resize: none;
         }
+        .button-container {
+            text-align: center;
+            margin: 20px 0;
+        }
         .button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             font-size: 16px;
             cursor: pointer;
             border: none;
             border-radius: 5px;
             background-color: #007bff;
             color: white;
-            margin: 10px;
+            margin: 8px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
         }
         .button:disabled {
-            background-color: #ccc;
+            background-color: #a0a0a0;
+            cursor: not-allowed;
         }
         .audio-player {
-            margin-top: 20px;
+            width: 100%;
+            margin: 20px 0;
         }
         .results {
-            margin-top: 30px;
-            text-align: left;
-        }
-        .results h3 {
-            margin-bottom: 10px;
-        }
-        .table-container {
-            margin-top: 20px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin: 15px 0;
+            background-color: white;
         }
         th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 1px solid #dee2e6;
             text-align: center;
         }
-        .phoneme-details {
-            margin-top: 20px;
-            display: none;
-            overflow-y: auto;
-            max-height: 300px;
-            border: 1px solid #ddd;
-            background-color: #88f687;
-            padding: 10px;
+        th {
+            background-color: #007bff;
+            color: white;
         }
-        .phoneme-table th, .phoneme-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
+        .phoneme-details {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+        .ielts-score {
+            padding: 20px;
+            background-color: #fff3e6;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 24px;
+            color: #cc5500;
+            font-weight: bold;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Left Panel -->
+    <div class="left-panel">
         <h1>Conversation Evaluation</h1>
         <textarea id="transcript" class="text-field" placeholder="Conversation transcript will appear here..." readonly></textarea>
-        <div>
+        <div class="button-container">
             <button id="startConversation" class="button">Start Conversation</button>
             <button id="stopConversation" class="button" disabled>Stop Conversation</button>
             <button id="controlButton" class="button" disabled>Start Speaking</button>
         </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
         <div class="audio-player">
-            <audio id="audioPlayer" controls></audio>
+            <audio id="audioPlayer" controls style="width: 100%"></audio>
         </div>
+        
         <div class="results">
             <h3>Assessment Scores</h3>
-            <div class="table-container">
-                <table id="scoresTable">
-                    <thead>
-                        <tr>
-                            <th>Accuracy</th>
-                            <th>Completeness</th>
-                            <th>Fluency</th>
-                            <th>Prosody</th>
-                            <th>Pronunciation</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+            <table id="scoresTable">
+                <thead>
+                    <tr>
+                        <th>Accuracy</th>
+                        <th>Completeness</th>
+                        <th>Fluency</th>
+                        <th>Prosody</th>
+                        <th>Pronunciation</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <button id="phonemeButton" class="button" style="display: none; margin: 15px 0;">Pronunciation Report</button>
+            
             <div class="phoneme-details">
                 <table id="phonemeTable" class="phoneme-table"></table>
             </div>
-            <button id="phonemeButton" class="button" style="display: none;">Pronunciation Report</button>
         </div>
-        <div class="ielts-score" style="margin-top: 20px; text-align: center; color: #974110; font-size: 24px; font-weight: bold;">
+
+        <div class="ielts-score">
             <span id="ieltsBand">IELTS Band Score: </span>
         </div>
     </div>
+
     <script src="{{ url_for('static', filename='index.js') }}"></script>
 </body>
 </html>

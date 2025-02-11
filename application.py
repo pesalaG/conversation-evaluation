@@ -312,7 +312,7 @@ def chat_response(referenceText):
     """
 
     user_message = f"""
-    I need you to maintain a friendly conversation with user according to the content they said. following is what they said:
+    I need you to maintain a friendly conversation with user according to the content they said. don't make very lenghty statements keep it natural. following is what they said:
     {referenceText}
    """
 

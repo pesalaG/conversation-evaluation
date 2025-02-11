@@ -149,14 +149,55 @@ async function stopRecording() {
         } catch (error) {
             alert('Error: ' + error.message);
         }
+        finally {
+            audioChunks = []; // Clear audio chunks after processing
+        }
     };
 }
 
-// Update transcript display
+
+// function updateTranscript() {
+//     const transcriptField = document.getElementById('transcript');
+//     transcriptField.innerHTML = ''; // Clear existing content
+
+//     conversationHistory.forEach(msg => {
+//         const messageDiv = document.createElement('div');
+//         messageDiv.className = `message ${msg.role}-message`;
+        
+//         const roleSpan = document.createElement('span');
+//         roleSpan.className = 'message-role';
+//         roleSpan.textContent = msg.role === 'user' ? 'You:' : 'Assistant:';
+        
+//         const contentSpan = document.createElement('span');
+//         contentSpan.textContent = msg.content;
+
+//         messageDiv.appendChild(roleSpan);
+//         messageDiv.appendChild(contentSpan);
+//         transcriptField.appendChild(messageDiv);
+//     });
+
+//     // Scroll to bottom
+//     transcriptField.scrollTop = transcriptField.scrollHeight;
+// }
+
 function updateTranscript() {
-    transcriptField.textContent = conversationHistory
-        .map(msg => `${msg.role}: ${msg.content}`)
-        .join('\n');
+    const transcriptField = document.getElementById('transcript');
+    transcriptField.innerHTML = ''; // Clear existing content
+
+    conversationHistory.forEach(msg => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${msg.role}-message`;
+        
+        // Remove role span and keep only content
+        const contentSpan = document.createElement('span');
+        contentSpan.textContent = msg.content;
+
+        messageDiv.appendChild(contentSpan);
+        transcriptField.appendChild(messageDiv);
+    });
+
+    // Scroll to bottom
+    transcriptField.scrollTop = transcriptField.scrollHeight;
 }
 
 

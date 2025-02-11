@@ -10,7 +10,7 @@
             margin: 20px;
             display: flex;
             gap: 0;
-            height: 100vh;
+            height: 93vh;
         }
         .left-panel, .right-panel {
             flex: 3;
@@ -23,16 +23,19 @@
             border-right: 2px solid #ccc;
             width: 54%;  /* Set right panel to 40% of screen */
             flex: 0 0 54%;
+            overflow: visible;
         }
         .text-field {
             width: 95%;
-            height: 350px;
+            height: 400px;
             margin: 20px 0;
             padding: 15px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 8px;
             resize: none;
+            overflow-y: auto;
+            white-space: pre-wrap;
         }
         .button-container {
             text-align: center;
@@ -102,13 +105,41 @@
             color: #2c3e50;
             margin-bottom: 25px;
         }
+
+
+    /* Message styling */
+    .message {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        line-height: 1.5;
+    }
+
+    .user-message {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+        margin-right: 20%;
+    }
+
+    .assistant-message {
+        background-color: #f5f5f5;
+        color: #212121;
+        margin-left: 20%;
+    }
+
+    .message-role {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+        font-size: 0.9em;
+    }
     </style>
 </head>
 <body>
     <!-- Left Panel -->
     <div class="left-panel">
         <h1>Conversation Evaluation</h1>
-        <textarea id="transcript" class="text-field" placeholder="Conversation transcript will appear here..." readonly></textarea>
+        <div id="transcript" class="text-field" placeholder="Conversation will appear here..."></div>
         <div class="button-container">
             <button id="startConversation" class="button">Start Conversation</button>
             <button id="stopConversation" class="button" disabled>Stop Conversation</button>

@@ -4,8 +4,7 @@ let audioBlob;
 let transcriptText = "";
 let conversationHistory = [];
 const controlButton = document.getElementById('controlButton');
-const startConversationButton = document.getElementById('startConversation');
-const stopConversationButton = document.getElementById('stopConversation');
+const ConversationButton = document.getElementById('ConversationButton');
 const transcriptField = document.getElementById('transcript');
 const audioPlayer = document.getElementById('audioPlayer');
 const scoresTable = document.querySelector('#scoresTable tbody');
@@ -14,8 +13,15 @@ const phonemeDetails = document.querySelector('.phoneme-details');
 const phonemeTable = document.getElementById('phonemeTable');
 
 // Event listeners
-startConversationButton.addEventListener('click', startConversation);
-stopConversationButton.addEventListener('click', stopConversation);
+// startConversationButton.addEventListener('click', startConversation);
+// stopConversationButton.addEventListener('click', stopConversation);
+ConversationButton.addEventListener('click', async () => {
+    if (ConversationButton.textContent === 'Start Conversation') {
+        await startConversation();
+    } else if (ConversationButton.textContent === 'Stop Conversation') {
+        await stopConversation();
+    }
+});
 controlButton.addEventListener('click', async () => {
     if (controlButton.textContent === 'Start Speaking') {
         await startRecording();
@@ -31,64 +37,59 @@ phonemeButton.addEventListener('click', () => {
 async function startConversation() {
     const response = await fetch('/start-conversation', { method: 'POST' });
     if (response.ok) {
-        startConversationButton.disabled = true;
-        stopConversationButton.disabled = false;
+        ConversationButton.textContent = 'Stop Conversation';
         controlButton.disabled = false;
         conversationHistory = [];
-        transcriptField.textContent = '';
-        scoresTable.innerHTML = '';
-        phonemeTable.innerHTML = '';
-        phonemeDetails.style.display = 'none';
-        phonemeButton.style.display = 'none';
         document.getElementById('ieltsBand').textContent = 'IELTS Band Score: ';
+        resetUI();
+
     }
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////////
 async function stopConversation() {
-    const response = await fetch('/stop-conversation', { method: 'POST' });
-    if (response.ok) {
+    try {
+        controlButton.disabled = true;
+        controlButton.textContent = 'Start Speaking';
+        ConversationButton.textContent = 'Start Conversation';
+        ConversationButton.disabled = true;
+
+        const response = await fetch('/stop-conversation', { method: 'POST' });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Error: ${errorData.error}`);
+        }
+
         // Parse the JSON response
         const jsonData = await response.json();
 
-        // to check wheter correct audio is being sent to evaluation
-        // const audioResponse = await fetch('/get-audio'); // Add a new endpoint for audio
-        // if (audioResponse.ok) {
-        //     const audioBlob = await audioResponse.blob();
-        //     const audioUrl = URL.createObjectURL(audioBlob);
-        //     audioPlayer.src = audioUrl;
-        //     audioPlayer.load();
-        //     audioPlayer.play();
-        // } else {
-        //     alert('Failed to fetch the audio.');
-        // }
+        // Fetch the audio
+        const audioResponse = await fetch('/get-audio');
+        if (!audioResponse.ok) {
+            throw new Error('Failed to fetch the audio.');
+        }
+
+        const audioBlob = await audioResponse.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        audioPlayer.src = audioUrl;
+        audioPlayer.load();
 
         // Update the IELTS Band Score section
         document.getElementById('ieltsBand').textContent = `IELTS Band Score: ${jsonData.IELTS_band_score}`;
-        startConversationButton.disabled = false;
-        stopConversationButton.disabled = true;
-        controlButton.disabled = true;
-        controlButton.textContent = 'Start Speaking';
 
-        let pronunciationResult = null;
-        let ieltsBandScore = null;
-        let whisperResult = null;
-        whisperResult = jsonData.whisper_result;
-        pronunciationResult = jsonData.pronunciation_result;
-        ieltsBandScore = jsonData.IELTS_band_score;
+        const { whisper_result, pronunciation_result, IELTS_band_score } = jsonData;
 
         // Ensure pronunciation result is valid before proceeding
-        if (!pronunciationResult || !pronunciationResult.NBest || pronunciationResult.NBest.length === 0) {
-            alert('Pronunciation result does not contain a valid NBest array.');
-            return;
+        if (!pronunciation_result || !pronunciation_result.NBest || pronunciation_result.NBest.length === 0) {
+            throw new Error('Pronunciation result does not contain a valid NBest array.');
         }
 
-        const nBest = pronunciationResult.NBest[0];
+        const nBest = pronunciation_result.NBest[0];
 
         // Update the IELTS Band Score section
         const ieltsBandElement = document.getElementById('ieltsBand');
-        ieltsBandElement.textContent = `IELTS Band Score: ${ieltsBandScore}`;
+        ieltsBandElement.textContent = `IELTS Band Score: ${IELTS_band_score}`;
 
         scoresTable.innerHTML = 
             `<tr>
@@ -102,10 +103,14 @@ async function stopConversation() {
         populatePhonemeTable(nBest.Words);
 
         phonemeButton.style.display = 'inline-block';
-        learnPronunciationButton.style.display = 'inline-block';
-    } else {
-        const errorData = await response.json();
-        alert(`Error: ${errorData.error}`);
+        //learnPronunciationButton.style.display = 'inline-block';
+
+    } catch (error) {
+        console.error('Error in stopConversation:', error);
+        alert(error.message);
+    } finally {
+        // Ensure the button is enabled regardless of success or failure
+        ConversationButton.disabled = false;
     }
 }
 //////////////////////////////////////////////////////////////////////////////////////
@@ -118,67 +123,49 @@ async function startRecording() {
     mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
     mediaRecorder.start();
     controlButton.textContent = 'Stop Speaking';
+    ConversationButton.disabled = true;
 }
 
 // Stop recording
 async function stopRecording() {
     mediaRecorder.stop();
     mediaRecorder.onstop = async () => {
+        controlButton.textContent = 'Start Speaking';
+        controlButton.disabled = true;
         audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
         const formData = new FormData();
         formData.append('audio', audioBlob, 'audio.wav');
 
         try {
-            const response = await fetch('/process-user-audio', {
+            const TranscriptResponse = await fetch('/get-transcript', {
                 method: 'POST',
                 body: formData,
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                conversationHistory.push({ role: 'user', content: data.user_transcript });
-                conversationHistory.push({ role: 'assistant', content: data.assistant_response });
-
-                await fetchAndPlayTTS(data.assistant_response);
-
-
+            if (TranscriptResponse.ok) {
+                const transcriptData = await TranscriptResponse.json();
+                conversationHistory.push({ role: 'user', content: transcriptData.user_transcript });
                 updateTranscript();
-                controlButton.textContent = 'Start Speaking';
- 
             }
+            const AssistantResponse = await fetch('/get-assistant-response', { method: 'POST' });
+            if (AssistantResponse.ok) {
+                const assistantData = await AssistantResponse.json();
+                conversationHistory.push({ role: 'assistant', content: assistantData.assistant_response });
+                updateTranscript();
+                await fetchAndPlayTTS(assistantData.assistant_response);
+            }
+
         } catch (error) {
             alert('Error: ' + error.message);
         }
         finally {
             audioChunks = []; // Clear audio chunks after processing
+            controlButton.disabled = false;
+            ConversationButton.disabled = false;
         }
     };
 }
 
-
-// function updateTranscript() {
-//     const transcriptField = document.getElementById('transcript');
-//     transcriptField.innerHTML = ''; // Clear existing content
-
-//     conversationHistory.forEach(msg => {
-//         const messageDiv = document.createElement('div');
-//         messageDiv.className = `message ${msg.role}-message`;
-        
-//         const roleSpan = document.createElement('span');
-//         roleSpan.className = 'message-role';
-//         roleSpan.textContent = msg.role === 'user' ? 'You:' : 'Assistant:';
-        
-//         const contentSpan = document.createElement('span');
-//         contentSpan.textContent = msg.content;
-
-//         messageDiv.appendChild(roleSpan);
-//         messageDiv.appendChild(contentSpan);
-//         transcriptField.appendChild(messageDiv);
-//     });
-
-//     // Scroll to bottom
-//     transcriptField.scrollTop = transcriptField.scrollHeight;
-// }
 
 function updateTranscript() {
     const transcriptField = document.getElementById('transcript');
@@ -199,13 +186,6 @@ function updateTranscript() {
     // Scroll to bottom
     transcriptField.scrollTop = transcriptField.scrollHeight;
 }
-
-
-controlButton.addEventListener('click', async () => {
-    if (controlButton.textContent === 'Start Recording') {await startRecording();
-    } else if (controlButton.textContent === 'Stop Recording') {stopRecording();} 
-    else if (controlButton.textContent === 'Refresh') {resetUI();}
-});
 
 
 
@@ -275,5 +255,4 @@ function resetUI() {
     phonemeDetails.style.display = 'none';
     phonemeButton.style.display = 'none';
     controlButton.textContent = 'Start Speaking';
-    controlButton.disabled = false;
 }

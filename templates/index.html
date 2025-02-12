@@ -106,33 +106,32 @@
             margin-bottom: 25px;
         }
 
+        /* Message styling */
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
 
-    /* Message styling */
-    .message {
-        margin-bottom: 15px;
-        padding: 10px;
-        border-radius: 8px;
-        line-height: 1.5;
-    }
+        .user-message {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            margin-right: 20%;
+        }
 
-    .user-message {
-        background-color: #e3f2fd;
-        color: #0d47a1;
-        margin-right: 20%;
-    }
+        .assistant-message {
+            background-color: #f5f5f5;
+            color: #212121;
+            margin-left: 20%;
+        }
 
-    .assistant-message {
-        background-color: #f5f5f5;
-        color: #212121;
-        margin-left: 20%;
-    }
-
-    .message-role {
-        font-weight: bold;
-        display: block;
-        margin-bottom: 5px;
-        font-size: 0.9em;
-    }
+        .message-role {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -141,8 +140,8 @@
         <h1>Conversation Evaluation</h1>
         <div id="transcript" class="text-field" placeholder="Conversation will appear here..."></div>
         <div class="button-container">
-            <button id="startConversation" class="button">Start Conversation</button>
-            <button id="stopConversation" class="button" disabled>Stop Conversation</button>
+            <button id="ConversationButton" class="button">Start Conversation</button>
+            <!-- <button id="stopConversation" class="button" disabled>Stop Conversation</button> -->
             <button id="controlButton" class="button" disabled>Start Speaking</button>
         </div>
     </div>

@@ -144,49 +144,6 @@ def get_audio():
         return jsonify({"error": "No audio data found"}), 400
 
 ###################################################################################################################
-# @app.route("/process-user-audio", methods=["POST"])
-# def process_user_audio():
-#     global conversation_history, combined_audio, combined_transcript
-#     try:
-#         f = request.files['audio']
-#         audio_bytes = f.read()
-
-#         logging.debug(f"Uploaded file: {f.filename}, size: {len(audio_bytes)} bytes")
-
-#         # Convert audio bytes to AudioSegment for transcription
-#         audio_stream_transcribe = BytesIO(audio_bytes)
-#         audio_stream_transcribe.seek(0)
-#         current_transcript, _ = whisper_transcribe(audio_stream_transcribe)
-
-#         # Create a separate stream for audio processing
-#         audio_stream_process = BytesIO(audio_bytes)
-#         audio_stream_process.seek(0)
-
-#         try:
-#             # Load audio using the new stream
-#             audio_pron = AudioSegment.from_file(audio_stream_process)
-#             #audio_pron = audio_pron.set_frame_rate(16000).set_channels(1).set_sample_width(2)
-#         except Exception as e:
-#             return jsonify({"error": f"Audio conversion failed: {str(e)}"}), 500
-
-#         with conversation_lock:
-#             conversation_history.append({"role": "user", "content": current_transcript})
-#             combined_transcript += " " + current_transcript
-
-#             # Append processed audio
-#             combined_audio += audio_pron
-
-#             assistant_response = chat_response(conversation_history)
-#             conversation_history.append({"role": "assistant", "content": assistant_response})
-
-#         return jsonify({"assistant_response": assistant_response,"user_transcript": current_transcript})
-
-#     except Exception as e:
-#         logging.error(f"Error processing audio: {e}")
-#         return jsonify({"error": "Internal server error"}), 500
-
-
-###################################################################################################################
 
 @app.route("/get-transcript", methods=["POST"])
 def get_transcript():
